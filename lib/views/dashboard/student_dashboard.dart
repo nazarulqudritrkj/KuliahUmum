@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
@@ -7,7 +8,7 @@ import '../../core/models/registration_model.dart';
 import '../../core/services/app_state_service.dart';
 import '../../core/utils/responsive_layout.dart';
 
-class StudentDashboard extends StatelessWidget {
+class StudentDashboard extends StatefulWidget {
   final AppStateService stateService;
   final VoidCallback onGoToCatalog;
   final Function(EventModel) onViewEvent;
@@ -20,8 +21,48 @@ class StudentDashboard extends StatelessWidget {
   });
 
   @override
+  State<StudentDashboard> createState() => _StudentDashboardState();
+}
+
+class _StudentDashboardState extends State<StudentDashboard> with SingleTickerProviderStateMixin {
+  late DateTime _currentTime;
+  Timer? _timer;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTime = DateTime.now();
+    // Realtime live ticker every second
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentTime = DateTime.now();
+        });
+      }
+    });
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 0.88, end: 1.15).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final user = stateService.currentUser!;
+    final user = widget.stateService.currentUser!;
     final isMobile = ResponsiveLayout.isMobile(context);
 
     return SingleChildScrollView(
@@ -29,6 +70,8 @@ class StudentDashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildLiveStatusBar(isMobile),
+          const SizedBox(height: 16),
           _buildWelcomeBanner(context, user.fullName, isMobile),
           const SizedBox(height: 24),
           _buildStatsRow(context, isMobile),
@@ -44,120 +87,281 @@ class StudentDashboard extends StatelessWidget {
     );
   }
 
+  /// Live System Status Bar with pulsing connection beacon (Psychology: Trust & Realtime Authority)
+  Widget _buildLiveStatusBar(bool isMobile) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF100C2A),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF2D1F5E)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A7C3AED),
+            blurRadius: 16,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              ScaleTransition(
+                scale: _pulseAnimation,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFF10B981),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'SISTEM SIM-KU AKTIF • CLOUD SYNC LIVE',
+                style: GoogleFonts.plusJakartaSans(
+                  color: const Color(0xFF34D399),
+                  fontSize: isMobile ? 10 : 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+          // Live Digital Clock
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFF3B2D75)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.access_time_rounded, size: 13, color: AppColors.sunYellow),
+                const SizedBox(width: 6),
+                Text(
+                  _formatLiveTime(_currentTime),
+                  style: GoogleFonts.firaCode(
+                    color: AppColors.sunYellow,
+                    fontSize: isMobile ? 11 : 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWelcomeBanner(BuildContext context, String name, bool isMobile) {
-    final hour = DateTime.now().hour;
-    final greeting = hour < 12 ? 'Selamat Pagi ☀️' : hour < 17 ? 'Selamat Siang 🌤️' : 'Selamat Sore 🌆';
-    final now = DateTime.now();
-    final upcomingCount = stateService.totalUpcomingRegistered;
+    final hour = _currentTime.hour;
+    String greeting;
+    String motivationQuote;
+
+    if (hour >= 4 && hour < 11) {
+      greeting = 'Selamat Pagi 🌅';
+      motivationQuote = 'Mulai harimu dengan antusiasme belajar & perluas wawasan akademikmu!';
+    } else if (hour >= 11 && hour < 15) {
+      greeting = 'Selamat Siang ☀️';
+      motivationQuote = 'Kembangkan potensi terbaikmu melalui kuliah umum interaktif!';
+    } else if (hour >= 15 && hour < 18) {
+      greeting = 'Selamat Sore 🌇';
+      motivationQuote = 'Waktu inspiratif untuk mendalami inovasi dan wawasan masa depan.';
+    } else {
+      greeting = 'Selamat Malam 🌙';
+      motivationQuote = 'Refleksikan capaian hari ini dan siapkan target prestasimu esok hari.';
+    }
+
+    final upcomingCount = widget.stateService.totalUpcomingRegistered;
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 20 : 28),
+      padding: EdgeInsets.all(isMobile ? 22 : 32),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF4C1D95), Color(0xFF7C3AED), Color(0xFF9333EA)],
+          colors: [Color(0xFF3B1373), Color(0xFF6D28D9), Color(0xFF4338CA)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: const [
-          BoxShadow(color: Color(0x337C3AED), blurRadius: 24, offset: Offset(0, 8)),
+          BoxShadow(color: Color(0x407C3AED), blurRadius: 30, offset: Offset(0, 10)),
         ],
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
       ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Ambient glowing orb
           Positioned(
-            right: -20,
-            top: -20,
+            right: -30,
+            top: -30,
             child: Container(
-              width: 160,
-              height: 160,
+              width: 180,
+              height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.sunYellow.withValues(alpha: 0.12),
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.sunYellow.withValues(alpha: 0.25),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
           Positioned(
-            right: 30,
-            bottom: -30,
+            right: 40,
+            bottom: -40,
             child: Container(
-              width: 100,
-              height: 100,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.06),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF06B6D4).withValues(alpha: 0.20),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.sunYellow.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.sunYellow.withValues(alpha: 0.4)),
-                ),
-                child: Text(
-                  '📅 ${_formatDate(now)}',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AppColors.sunYellow,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+              // Real-time Date Badge with Golden Live Icon
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: AppColors.sunYellow.withValues(alpha: 0.20),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.sunYellow.withValues(alpha: 0.5)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.sunYellow.withValues(alpha: 0.25),
+                          blurRadius: 14,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.event_available_rounded, color: AppColors.sunYellow, size: 15),
+                        const SizedBox(width: 8),
+                        Text(
+                          _formatFullIndonesianDate(_currentTime),
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.sunYellow,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Text(
                 greeting,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: isMobile ? 14 : 15,
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontWeight: FontWeight.w500,
+                  fontSize: isMobile ? 14 : 16,
+                  color: const Color(0xFFE0D8FF),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 name,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: isMobile ? 22 : 28,
+                  fontSize: isMobile ? 24 : 32,
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
+                  shadows: [
+                    Shadow(
+                      color: const Color(0xFF7C3AED).withValues(alpha: 0.5),
+                      blurRadius: 16,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                stateService.currentUser?.prodi ?? '',
+                widget.stateService.currentUser?.prodi ?? 'Teknologi Rekayasa Komputer dan Jaringan',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFFCDC8FF),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Motivational Psychological Quote
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, color: AppColors.sunYellow, size: 16),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        motivationQuote,
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white.withValues(alpha: 0.95),
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               if (upcomingCount > 0) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.notifications_active_rounded, color: AppColors.sunYellow, size: 18),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Flexible(
                         child: Text(
-                          'Anda memiliki $upcomingCount kuliah umum yang akan segera berlangsung',
+                          'Anda memiliki $upcomingCount kuliah umum yang siap dihadiri!',
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.white,
                             fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -181,25 +385,26 @@ class StudentDashboard extends StatelessWidget {
               _buildStatCard(
                 icon: Icons.event_available_rounded,
                 label: 'Kuliah Dihadiri',
-                value: '${stateService.totalEventsAttended}',
+                value: '${widget.stateService.totalEventsAttended}',
                 color: AppColors.primaryPurple,
                 bgColor: AppColors.purpleSurface,
-                trend: '+2 bulan ini',
+                trend: 'Pencapaian',
               ),
               const SizedBox(height: 12),
               _buildStatCard(
                 icon: Icons.workspace_premium_rounded,
-                label: 'E-Sertifikat',
-                value: '${stateService.totalCertificatesEarned}',
+                label: 'E-Sertifikat Terverifikasi',
+                value: '${widget.stateService.totalCertificatesEarned}',
                 color: AppColors.sunYellowDark,
                 bgColor: AppColors.sunYellowLight,
-                trend: 'Diraih',
+                trend: '⭐ Resmi',
+                isGoldHighlight: true,
               ),
               const SizedBox(height: 12),
               _buildStatCard(
                 icon: Icons.pending_actions_rounded,
                 label: 'Akan Datang',
-                value: '${stateService.totalUpcomingRegistered}',
+                value: '${widget.stateService.totalUpcomingRegistered}',
                 color: AppColors.info,
                 bgColor: AppColors.infoLight,
                 trend: 'Terdaftar',
@@ -213,21 +418,22 @@ class StudentDashboard extends StatelessWidget {
               child: _buildStatCard(
                 icon: Icons.event_available_rounded,
                 label: 'Kuliah Dihadiri',
-                value: '${stateService.totalEventsAttended}',
+                value: '${widget.stateService.totalEventsAttended}',
                 color: AppColors.primaryPurple,
                 bgColor: AppColors.purpleSurface,
-                trend: '+2 bulan ini',
+                trend: 'Pencapaian',
               ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: _buildStatCard(
                 icon: Icons.workspace_premium_rounded,
-                label: 'E-Sertifikat',
-                value: '${stateService.totalCertificatesEarned}',
+                label: 'E-Sertifikat Terverifikasi',
+                value: '${widget.stateService.totalCertificatesEarned}',
                 color: AppColors.sunYellowDark,
                 bgColor: AppColors.sunYellowLight,
-                trend: 'Diraih',
+                trend: '⭐ Resmi',
+                isGoldHighlight: true,
               ),
             ),
             const SizedBox(width: 14),
@@ -235,7 +441,7 @@ class StudentDashboard extends StatelessWidget {
               child: _buildStatCard(
                 icon: Icons.pending_actions_rounded,
                 label: 'Akan Datang',
-                value: '${stateService.totalUpcomingRegistered}',
+                value: '${widget.stateService.totalUpcomingRegistered}',
                 color: AppColors.info,
                 bgColor: AppColors.infoLight,
                 trend: 'Terdaftar',
@@ -254,15 +460,23 @@ class StudentDashboard extends StatelessWidget {
     required Color color,
     required Color bgColor,
     required String trend,
+    bool isGoldHighlight = false,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
-        boxShadow: const [
-          BoxShadow(color: Color(0x08000000), blurRadius: 12, offset: Offset(0, 4)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isGoldHighlight ? AppColors.sunYellow.withValues(alpha: 0.6) : color.withValues(alpha: 0.18),
+          width: isGoldHighlight ? 1.5 : 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isGoldHighlight ? const Color(0x22F59E0B) : const Color(0x0C000000),
+            blurRadius: 16,
+            offset: const Offset(0, 5),
+          ),
         ],
       ),
       child: Column(
@@ -273,58 +487,63 @@ class StudentDashboard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: color, size: 20),
+                child: Icon(icon, color: color, size: 22),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: isGoldHighlight ? AppColors.sunYellow.withValues(alpha: 0.18) : color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: isGoldHighlight ? Border.all(color: AppColors.sunYellow.withValues(alpha: 0.4)) : null,
                 ),
                 child: Text(
                   trend,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: color,
+                    color: isGoldHighlight ? const Color(0xFFD97706) : color,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             value,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 26,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: color,
+              color: isGoldHighlight ? const Color(0xFFB45309) : color,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppStyles.bodyMedium.copyWith(fontSize: 12, fontWeight: FontWeight.w600),
+            style: AppStyles.bodyMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
   }
 
-
-
   Widget _buildQuickActions(BuildContext context, bool isMobile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Aksi Cepat', style: AppStyles.heading3),
+        Row(
+          children: [
+            const Icon(Icons.bolt_rounded, color: AppColors.sunYellow, size: 22),
+            const SizedBox(width: 8),
+            Text('Aksi Cepat Interaktif', style: AppStyles.heading3),
+          ],
+        ),
         const SizedBox(height: 14),
         Row(
           children: [
@@ -333,7 +552,7 @@ class StudentDashboard extends StatelessWidget {
                 icon: Icons.search_rounded,
                 label: 'Cari Kuliah\nUmum',
                 gradient: AppColors.purpleGradient,
-                onTap: onGoToCatalog,
+                onTap: widget.onGoToCatalog,
               ),
             ),
             const SizedBox(width: 12),
@@ -342,7 +561,7 @@ class StudentDashboard extends StatelessWidget {
                 icon: Icons.qr_code_2_rounded,
                 label: 'Tiket QR\nSaya',
                 gradient: AppColors.sunGradient,
-                onTap: () {},
+                onTap: widget.onGoToCatalog,
               ),
             ),
             const SizedBox(width: 12),
@@ -351,11 +570,11 @@ class StudentDashboard extends StatelessWidget {
                 icon: Icons.workspace_premium_rounded,
                 label: 'Unduh\nSertifikat',
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF10B981), Color(0xFF34D399)],
+                  colors: [Color(0xFF059669), Color(0xFF10B981)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                onTap: () {},
+                onTap: widget.onGoToCatalog,
               ),
             ),
             const SizedBox(width: 12),
@@ -364,11 +583,11 @@ class StudentDashboard extends StatelessWidget {
                 icon: Icons.bar_chart_rounded,
                 label: 'Riwayat\nKehadiran',
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
+                  colors: [Color(0xFF2563EB), Color(0xFF60A5FA)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                onTap: () {},
+                onTap: widget.onGoToCatalog,
               ),
             ),
           ],
@@ -383,18 +602,19 @@ class StudentDashboard extends StatelessWidget {
     required LinearGradient gradient,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
         decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.first.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: gradient.colors.first.withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -419,7 +639,7 @@ class StudentDashboard extends StatelessWidget {
   }
 
   Widget _buildUpcomingEvents(BuildContext context, bool isMobile) {
-    final upcoming = stateService.events
+    final upcoming = widget.stateService.events
         .where((e) => e.status == EventStatus.upcoming)
         .take(3)
         .toList();
@@ -432,16 +652,18 @@ class StudentDashboard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Text(
-                '📢 Kuliah Umum Terkini',
-                style: AppStyles.heading3,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+            Row(
+              children: [
+                const Icon(Icons.campaign_rounded, color: AppColors.primaryPurple, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  'Kuliah Umum Terkini & Live Countdown',
+                  style: AppStyles.heading3,
+                ),
+              ],
             ),
             TextButton(
-              onPressed: onGoToCatalog,
+              onPressed: widget.onGoToCatalog,
               child: Text(
                 'Lihat Semua →',
                 style: GoogleFonts.plusJakartaSans(
@@ -458,10 +680,12 @@ class StudentDashboard extends StatelessWidget {
           builder: (context, constraints) {
             if (constraints.maxWidth < 650) {
               return Column(
-                children: upcoming.map((e) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildEventCard(context, e, isMobile: true),
-                )).toList(),
+                children: upcoming
+                    .map((e) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: _buildEventCard(context, e, isMobile: true),
+                        ))
+                    .toList(),
               );
             }
             final cardWidth = constraints.maxWidth < 900
@@ -492,58 +716,91 @@ class StudentDashboard extends StatelessWidget {
     ];
     final gradIdx = int.tryParse(event.bannerGradientIndex) ?? 0;
     final grad = gradients[gradIdx % gradients.length];
-    final daysUntil = event.dateTime.difference(DateTime.now()).inDays;
+    final countdownString = _formatLiveCountdown(event.dateTime);
 
     return GestureDetector(
-      onTap: () => onViewEvent(event),
+      onTap: () => widget.onViewEvent(event),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.border),
-          boxShadow: const [BoxShadow(color: Color(0x08000000), blurRadius: 12, offset: Offset(0, 4))],
+          boxShadow: const [BoxShadow(color: Color(0x0C000000), blurRadius: 14, offset: Offset(0, 5))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Banner
             Container(
-              height: 100,
+              height: 110,
               decoration: BoxDecoration(
                 gradient: grad,
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
               ),
               padding: const EdgeInsets.all(14),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      event.category,
-                      style: GoogleFonts.plusJakartaSans(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          event.category,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white.withValues(alpha: 0.95),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: event.isFull ? AppColors.danger : AppColors.sunYellow,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: const [
+                            BoxShadow(color: Color(0x22000000), blurRadius: 4),
+                          ],
+                        ),
+                        child: Text(
+                          event.isFull ? 'KUOTA PENUH' : 'TERSEDIA',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: event.isFull ? Colors.white : AppColors.darkSidebar,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                  // Real-time live countdown ticker badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: event.isFull ? AppColors.danger : AppColors.sunYellow,
+                      color: Colors.black.withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                     ),
-                    child: Text(
-                      event.isFull ? 'PENUH' : daysUntil == 0 ? 'HARI INI' : '$daysUntil hari lagi',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: event.isFull ? Colors.white : AppColors.darkSidebar,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.timer_outlined, color: AppColors.sunYellow, size: 14),
+                        const SizedBox(width: 6),
+                        Text(
+                          countdownString,
+                          style: GoogleFonts.firaCode(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -597,14 +854,14 @@ class StudentDashboard extends StatelessWidget {
                     children: [
                       Text(
                         '${event.registeredCount} / ${event.quota} peserta',
-                        style: AppStyles.bodySmall.copyWith(fontSize: 11),
+                        style: AppStyles.bodySmall.copyWith(fontSize: 11, fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: event.quotaFillPercentage,
-                          minHeight: 5,
+                          minHeight: 6,
                           backgroundColor: AppColors.border,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             event.isFull ? AppColors.danger : AppColors.primaryPurple,
@@ -623,7 +880,7 @@ class StudentDashboard extends StatelessWidget {
   }
 
   Widget _buildMyRegistrations(BuildContext context, bool isMobile) {
-    final myEvents = stateService.myRegisteredEventDetails;
+    final myEvents = widget.stateService.myRegisteredEventDetails;
     if (myEvents.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -724,6 +981,42 @@ class StudentDashboard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // --- Realtime Formatting Helpers ---
+
+  String _formatLiveTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    final s = dt.second.toString().padLeft(2, '0');
+    return '$h:$m:$s WIB';
+  }
+
+  String _formatFullIndonesianDate(DateTime dt) {
+    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    final dayName = days[dt.weekday - 1];
+    final monthName = months[dt.month - 1];
+    return '$dayName, ${dt.day} $monthName ${dt.year}';
+  }
+
+  String _formatLiveCountdown(DateTime target) {
+    final diff = target.difference(_currentTime);
+    if (diff.isNegative) {
+      return 'Acara Berlangsung / Selesai';
+    }
+    final days = diff.inDays;
+    final hours = diff.inHours % 24;
+    final minutes = diff.inMinutes % 60;
+    final seconds = diff.inSeconds % 60;
+
+    if (days > 0) {
+      return '${days}h ${hours}j ${minutes}m ${seconds}s';
+    }
+    return '${hours}j ${minutes}m ${seconds}s';
   }
 
   String _formatDate(DateTime dt) {
