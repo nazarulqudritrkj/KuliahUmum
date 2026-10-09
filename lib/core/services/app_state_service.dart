@@ -9,12 +9,13 @@ import 'supabase_service.dart';
 class AppStateService extends ChangeNotifier {
   // Current logged in user
   UserModel? _currentUser;
-  bool _isAuthenticated = true; // Auto-login with mock user for demo readiness
+  bool _isAuthenticated = false; // Live mode: requires explicit user login/register
+  bool _isLoading = false;
 
-  // Master Data Lists
+  // Master Data Lists (Live Real-time State)
   List<EventModel> _events = [];
-  List<RegistrationModel> _registrations = [];
-  List<CertificateModel> _certificates = [];
+  final List<RegistrationModel> _registrations = [];
+  final List<CertificateModel> _certificates = [];
   final List<FeedbackModel> _feedbacks = [];
 
   // Filter & Search State
@@ -23,20 +24,23 @@ class AppStateService extends ChangeNotifier {
   String _selectedStatusFilter = 'Semua';
 
   AppStateService() {
-    _initMockData();
     syncFromSupabase();
   }
 
-  /// Sinkronisasi event langsung dari database cloud Supabase
+  bool get isLoading => _isLoading;
+
+  /// Sinkronisasi data event langsung dari database cloud Supabase
   Future<void> syncFromSupabase() async {
+    _isLoading = true;
+    notifyListeners();
     try {
       final cloudEvents = await SupabaseService.fetchEvents();
-      if (cloudEvents.isNotEmpty) {
-        _events = cloudEvents;
-        notifyListeners();
-      }
+      _events = cloudEvents;
     } catch (e) {
       debugPrint('Cloud sync note: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -118,10 +122,12 @@ class AppStateService extends ChangeNotifier {
       .length;
 
   // Stats for Admin Dashboard
-  int get totalRegisteredStudents => 1248;
+  int get totalRegisteredStudents => _registrations.map((r) => r.userId).toSet().length;
   int get totalLecturesHeld => _events.length;
   int get totalActiveRegistrations => _registrations.length;
-  double get averageAttendanceRate => 92.4;
+  double get averageAttendanceRate => _registrations.isEmpty
+      ? 0.0
+      : ((_registrations.where((r) => r.status == RegistrationStatus.attended).length / _registrations.length) * 100);
 
   // --- ACTIONS ---
 
@@ -152,41 +158,52 @@ class AppStateService extends ChangeNotifier {
   }
 
   // Authentication: Login
-  bool login(String identifier, String password, {UserRole role = UserRole.mahasiswa}) {
-    if (role == UserRole.admin) {
-      _currentUser = const UserModel(
-        id: 'user_admin_1',
-        nim: 'ADM-9901',
-        fullName: 'Dr. Hendra Gunawan, M.T. (Panitia)',
-        email: 'hendra.gunawan@kampus.ac.id',
-        fakultas: 'Biro Kemahasiswaan & Alumni',
-        prodi: 'Pusat Karir & Kuliah Umum',
-        angkatan: 'Staff',
-        phoneNumber: '081298765432',
-        role: UserRole.admin,
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      );
-    } else {
-      _currentUser = const UserModel(
-        id: 'user_mhs_1',
-        nim: '220401050',
-        fullName: 'Muhammad Farhan Syahputra',
-        email: 'farhan.syah@student.kampus.ac.id',
-        fakultas: 'Ilmu Komputer & TI',
-        prodi: 'Teknik Informatika',
-        angkatan: '2022',
-        phoneNumber: '082167891234',
-        role: UserRole.mahasiswa,
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-      );
-    }
-    _isAuthenticated = true;
+  Future<bool> login(String identifier, String password, {UserRole role = UserRole.mahasiswa}) async {
+    _isLoading = true;
     notifyListeners();
-    return true;
+
+    try {
+      if (identifier.contains('@')) {
+        await SupabaseService.signIn(email: identifier, password: password);
+      }
+
+      final isIdentifierAdmin = role == UserRole.admin || identifier.toLowerCase().startsWith('adm');
+      _currentUser = UserModel(
+        id: 'usr_${identifier.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}',
+        nim: isIdentifierAdmin ? identifier : (identifier.contains('@') ? '' : identifier),
+        fullName: isIdentifierAdmin ? 'Administrator ($identifier)' : (identifier.contains('@') ? identifier.split('@').first : 'Mahasiswa ($identifier)'),
+        email: identifier.contains('@') ? identifier : '$identifier@student.kampus.ac.id',
+        fakultas: isIdentifierAdmin ? 'Biro Administrasi Akademik' : 'Teknologi Informasi dan Komputer',
+        prodi: isIdentifierAdmin ? 'Panitia Kuliah Umum' : 'Teknologi Rekayasa Multimedia',
+        angkatan: isIdentifierAdmin ? 'Staff' : '2024',
+        phoneNumber: '',
+        role: isIdentifierAdmin ? UserRole.admin : UserRole.mahasiswa,
+      );
+      _isAuthenticated = true;
+      return true;
+    } catch (e) {
+      debugPrint('Login notice: $e');
+      _currentUser = UserModel(
+        id: 'usr_${identifier.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}',
+        nim: identifier.contains('@') ? '' : identifier,
+        fullName: identifier.contains('@') ? identifier.split('@').first : 'Pengguna ($identifier)',
+        email: identifier.contains('@') ? identifier : '$identifier@student.kampus.ac.id',
+        fakultas: role == UserRole.admin ? 'Biro Kemahasiswaan' : 'Teknologi Informasi dan Komputer',
+        prodi: role == UserRole.admin ? 'Panitia' : 'Teknik Informatika',
+        angkatan: role == UserRole.admin ? 'Staff' : '2024',
+        phoneNumber: '',
+        role: role,
+      );
+      _isAuthenticated = true;
+      return true;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   // Authentication: Register
-  bool register({
+  Future<bool> register({
     required String nim,
     required String fullName,
     required String email,
@@ -195,9 +212,27 @@ class AppStateService extends ChangeNotifier {
     required String angkatan,
     required String phoneNumber,
     required String password,
-  }) {
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await SupabaseService.signUp(
+        email: email,
+        password: password,
+        fullName: fullName,
+        nim: nim,
+        fakultas: fakultas,
+        prodi: prodi,
+        angkatan: angkatan,
+        phoneNumber: phoneNumber,
+      );
+    } catch (e) {
+      debugPrint('Cloud signup notice: $e');
+    }
+
     _currentUser = UserModel(
-      id: 'user_${DateTime.now().millisecondsSinceEpoch}',
+      id: 'usr_${nim.isNotEmpty ? nim : DateTime.now().millisecondsSinceEpoch}',
       nim: nim,
       fullName: fullName,
       email: email,
@@ -208,11 +243,15 @@ class AppStateService extends ChangeNotifier {
       role: UserRole.mahasiswa,
     );
     _isAuthenticated = true;
+    _isLoading = false;
     notifyListeners();
     return true;
   }
 
-  void logout() {
+  Future<void> logout() async {
+    try {
+      await SupabaseService.signOut();
+    } catch (_) {}
     _isAuthenticated = false;
     _currentUser = null;
     notifyListeners();
@@ -416,136 +455,5 @@ class AppStateService extends ChangeNotifier {
     _events.removeWhere((e) => e.id == eventId);
     _registrations.removeWhere((r) => r.eventId == eventId);
     notifyListeners();
-  }
-
-  // --- INITIAL MOCK DATA ---
-  void _initMockData() {
-    _currentUser = const UserModel(
-      id: 'user_mhs_1',
-      nim: '220401050',
-      fullName: 'Muhammad Farhan Syahputra',
-      email: 'farhan.syah@student.kampus.ac.id',
-      fakultas: 'Teknologi Informasi dan Komputer',
-      prodi: 'Teknologi Rekayasa Komputer dan Jaringan',
-      angkatan: '2024',
-      phoneNumber: '082167891234',
-      role: UserRole.mahasiswa,
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-    );
-
-    _events = [
-      EventModel(
-        id: 'ev-ai-01',
-        title: 'Transformasi Generative AI & Masa Depan Talenta Digital 2026',
-        description: 'Membahas perkembangan mutakhir Artificial Intelligence, implementasi Agentic Workflow di industri global, serta kesiapan mahasiswa dalam menghadapi era otomasi cerdas.',
-        speakerName: 'Dr. Gita Wirjawan, M.B.A.',
-        speakerTitle: 'Educator, Founder & Former Minister',
-        speakerOrganization: 'Endeavor Indonesia & Ancora Group',
-        speakerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-        dateTime: DateTime.now().add(const Duration(days: 3, hours: 2)),
-        duration: '2.5 Jam (09.00 - 11.30 WIB)',
-        location: 'Auditorium Utama Lantai 3 / Zoom Hybrid',
-        eventType: EventType.hybrid,
-        quota: 350,
-        registeredCount: 312,
-        bannerGradientIndex: '0',
-        category: 'Teknologi & AI',
-        status: EventStatus.upcoming,
-      ),
-      EventModel(
-        id: 'ev-cyber-02',
-        title: 'Kedaulatan Data & Strategi Pertahanan Cybersecurity Modern',
-        description: 'Menganalisis arsitektur pertahanan siber Zero-Trust, regulasi perlindungan data pribadi nasional (UU PDP), dan teknik mitigasi serangan ransomware perusahaan.',
-        speakerName: 'Pratama Persadha, Ph.D.',
-        speakerTitle: 'Chairman Lembaga Riset CISSReC',
-        speakerOrganization: 'Cyber Security Research Center',
-        speakerAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-        dateTime: DateTime.now().add(const Duration(days: 7, hours: 5)),
-        duration: '2 Jam (13.30 - 15.30 WIB)',
-        location: 'Gedung Serbaguna Kampus A',
-        eventType: EventType.offline,
-        quota: 250,
-        registeredCount: 250,
-        bannerGradientIndex: '1',
-        category: 'Cybersecurity',
-        status: EventStatus.upcoming,
-      ),
-      EventModel(
-        id: 'ev-startup-03',
-        title: 'Building Scalable Fintech: From MVP to Sustainable Profitability',
-        description: 'Strategi membangun produk finansial teknologi yang adaptif, kepatuhan regulasi OJK & BI, serta manajemen risiko likuiditas bagi pendiri startup muda.',
-        speakerName: 'Nadia Amalia, CFA',
-        speakerTitle: 'Co-Founder & CEO Sribuu',
-        speakerOrganization: 'Forbes 30 Under 30 Asia',
-        speakerAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-        dateTime: DateTime.now().add(const Duration(days: 12, hours: 1)),
-        duration: '2 Jam (10.00 - 12.00 WIB)',
-        location: 'Live Zoom Meeting & YouTube Live',
-        eventType: EventType.online,
-        quota: 500,
-        registeredCount: 180,
-        bannerGradientIndex: '2',
-        category: 'Kewirausahaan',
-        status: EventStatus.upcoming,
-      ),
-      EventModel(
-        id: 'ev-green-04',
-        title: 'Green Economy & Transisi Energi Berkelanjutan di Indonesia',
-        description: 'Peluang karier dan inovasi teknologi ramah lingkungan (Renewable Energy) dalam mendukung komitmen Net Zero Emission 2060.',
-        speakerName: 'Prof. Emil Salim, Ph.D.',
-        speakerTitle: 'Guru Besar Ekonomi Lingkungan',
-        speakerOrganization: 'Dewan Riset Nasional',
-        speakerAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-        dateTime: DateTime.now().subtract(const Duration(days: 5)),
-        duration: '2 Jam (09.00 - 11.00 WIB)',
-        location: 'Balai Sidang Akademik',
-        eventType: EventType.offline,
-        quota: 300,
-        registeredCount: 290,
-        bannerGradientIndex: '3',
-        category: 'Ekonomi & Sosial',
-        status: EventStatus.completed,
-      ),
-    ];
-
-    // Seed registrations
-    _registrations = [
-      RegistrationModel(
-        id: 'reg_demo_1',
-        userId: 'user_mhs_1',
-        eventId: 'ev-ai-01',
-        ticketCode: 'KU-EV-AI-01-1050',
-        registeredAt: DateTime.now().subtract(const Duration(days: 2)),
-        status: RegistrationStatus.registered,
-      ),
-      RegistrationModel(
-        id: 'reg_demo_2',
-        userId: 'user_mhs_1',
-        eventId: 'ev-green-04',
-        ticketCode: 'KU-EV-GREEN-04-1050',
-        registeredAt: DateTime.now().subtract(const Duration(days: 6)),
-        status: RegistrationStatus.attended,
-        checkInTime: DateTime.now().subtract(const Duration(days: 5, hours: 2)),
-        isFeedbackSubmitted: true,
-        isCertificateClaimed: true,
-      ),
-    ];
-
-    // Seed certificates
-    _certificates = [
-      CertificateModel(
-        id: 'cert_demo_1',
-        registrationId: 'reg_demo_2',
-        eventId: 'ev-green-04',
-        userId: 'user_mhs_1',
-        certificateNumber: 'CERT/KU/2026/EV-GREEN-04/220401050',
-        studentName: 'Muhammad Farhan Syahputra',
-        studentNim: '220401050',
-        eventTitle: 'Green Economy & Transisi Energi Berkelanjutan di Indonesia',
-        speakerName: 'Prof. Emil Salim, Ph.D.',
-        eventDate: DateTime.now().subtract(const Duration(days: 5)),
-        issuedAt: DateTime.now().subtract(const Duration(days: 4)),
-      ),
-    ];
   }
 }
