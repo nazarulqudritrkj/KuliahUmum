@@ -26856,8 +26856,8 @@ _.r=d
 _.w=e
 _.x=f
 _.y=g
-_.z="Fakultas Ilmu Komputer & TI"
-_.Q="Teknik Informatika"
+_.z="Teknologi Informasi dan Komputer"
+_.Q="Teknologi Rekayasa Multimedia"
 _.as="2024"
 _.ay=_.ax=_.at=!0
 _.ch=h
@@ -89535,7 +89535,7 @@ this.b.ac(t.J).f.hI(B.ZR)},
 $S:0}
 A.qM.prototype={
 ag(){var s=$.aq(),r=t.s
-return new A.GT(new A.br(null,t.am),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),A.b(["Fakultas Ilmu Komputer & TI","Fakultas Teknik","Fakultas Ekonomi & Bisnis","Fakultas Kedokteran","Fakultas Hukum","Fakultas Ilmu Sosial & Politik"],r),A.b(["Teknik Informatika","Sistem Informasi","Teknologi Informasi","Ilmu Komputer","Teknik Elektro","Manajemen Bisnis","Akuntansi"],r),A.b(["2021","2022","2023","2024","2025","2026"],r))},
+return new A.GT(new A.br(null,t.am),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),new A.eo(B.bC,s),A.b(["Teknologi Informasi dan Komputer"],r),A.b(["Teknologi Rekayasa Multimedia","Teknologi Rekayasa Komputer dan Jaringan","Teknik Informatika","Teknologi Rekayasa Perangkat Lunak"],r),A.b(["2023","2024","2025","2026"],r))},
 av9(){return this.d.$0()}}
 A.GT.prototype={
 l(){var s=this,r=s.e,q=r.V$=$.aq()
@@ -89588,9 +89588,9 @@ o=A.U(l,A.k0(A.ae(A.b([B.Lc,B.b0,A.D("Daftarkan Akun & Aktifkan SIM-KU",l,l,l,A.
 n=$.eM()
 return A.CL(k,B.cX,A.ed(A.ha(new A.dt(B.En,A.U(l,A.aGs(A.ah(A.b([h,B.a2,s,B.bf,r,B.nu,q,B.ao,p,B.nu,o,B.aN,A.ed(A.dg(l,A.agM(l,l,l,B.c8,l,l,!0,l,A.dA(A.b([A.dA(l,l,l,l,l,l,l,l,l,A.ak().$2$color$fontWeight(B.A,B.v),"Masuk Sekarang")],t.VO),l,l,l,l,l,l,l,l,n,"Sudah memiliki akun terdaftar? "),B.ax,l,l,B.aJ,B.aO),B.G,!1,l,l,l,l,l,l,l,l,l,l,l,l,l,l,new A.avk(a),l,l,l,l,l,l),l,l)],g),B.t,B.h,B.f),m.d),B.i,l,l,new A.X(B.e,l,i,j,B.Qn,l,B.o),l,l,l,B.JD,l,l,l),l),B.JA,B.a1),l,l))},
 a8u(){var s=this,r=t.p
-return A.ah(A.b([A.ae(A.b([A.aN(s.mC(s.e,"Contoh: 220401050",B.md,"Nomor Induk Mahasiswa (NIM)",new A.auR()),1),B.da,A.aN(s.mC(s.f,"Sesuai KTM / KTP",B.dq,"Nama Lengkap Mahasiswa",new A.auS()),1)],r),B.l,B.h,B.f,0),B.f6,A.ae(A.b([A.aN(s.mC(s.r,"nama@student.kampus.ac.id",B.iR,"Email Kampus / Mahasiswa",new A.auT()),1),B.da,A.aN(s.mC(s.w,"081234567890",B.mi,"Nomor WhatsApp / HP",new A.auU()),1)],r),B.l,B.h,B.f,0),B.f6,A.ae(A.b([A.aN(s.q8(s.ch,"Fakultas",new A.auV(s),s.z),1),B.da,A.aN(s.q8(s.CW,"Program Studi",new A.auW(s),s.Q),1),B.da,A.e9(s.q8(s.cx,"Angkatan",new A.auX(s),s.as),null,140)],r),B.l,B.h,B.f,0),B.f6,A.ae(A.b([A.aN(s.P7(s.x,"Kata Sandi",s.at,new A.auY(s)),1),B.da,A.aN(s.Es(s.y,"Konfirmasi Kata Sandi",s.ax,new A.auZ(s),new A.av_(s)),1)],r),B.l,B.h,B.f,0)],r),B.l,B.h,B.f)},
+return A.ah(A.b([A.ae(A.b([A.aN(s.mC(s.f,"Masukkan nama lengkap",B.dq,"Nama Lengkap",new A.auR()),1),B.da,A.aN(s.mC(s.e,"Contoh: 220401050",B.md,"NIM (Nomor Induk Mahasiswa)",new A.auS()),1)],r),B.l,B.h,B.f,0),B.f6,A.ae(A.b([A.aN(s.mC(s.r,"nama@student.kampus.ac.id",B.iR,"Email Kampus / Mahasiswa/i",new A.auT()),1),B.da,A.aN(s.mC(s.w,"081234567890",B.mi,"Nomor WhatsApp",new A.auU()),1)],r),B.l,B.h,B.f,0),B.f6,A.ae(A.b([A.aN(s.q8(s.ch,"Jurusan",new A.auV(s),s.z),2),B.da,A.aN(s.q8(s.CW,"Program Studi",new A.auW(s),s.Q),2),B.da,A.e9(s.q8(s.cx,"Angkatan",new A.auX(s),s.as),null,140)],r),B.l,B.h,B.f,0),B.f6,A.ae(A.b([A.aN(s.P7(s.x,"Kata Sandi",s.at,new A.auY(s)),1),B.da,A.aN(s.Es(s.y,"Konfirmasi Kata Sandi",s.ax,new A.auZ(s),new A.av_(s)),1)],r),B.l,B.h,B.f,0)],r),B.l,B.h,B.f)},
 a8A(){var s=this
-return A.ah(A.b([s.mC(s.e,"Contoh: 220401050",B.md,"Nomor Induk Mahasiswa (NIM)",new A.av6()),B.a2,s.mC(s.f,"Sesuai KTM / KTP",B.dq,"Nama Lengkap Mahasiswa",new A.av7()),B.a2,s.mC(s.r,"nama@student.kampus.ac.id",B.iR,"Email Kampus / Mahasiswa",new A.av8()),B.a2,s.mC(s.w,"081234567890",B.mi,"Nomor WhatsApp / HP",new A.av9()),B.a2,s.q8(s.ch,"Fakultas",new A.ava(s),s.z),B.a2,s.q8(s.CW,"Program Studi",new A.avb(s),s.Q),B.a2,s.q8(s.cx,"Angkatan",new A.avc(s),s.as),B.a2,s.P7(s.x,"Kata Sandi",s.at,new A.avd(s)),B.a2,s.Es(s.y,"Konfirmasi Kata Sandi",s.ax,new A.ave(s),new A.avf(s))],t.p),B.l,B.h,B.f)},
+return A.ah(A.b([s.mC(s.f,"Masukkan nama lengkap",B.dq,"Nama Lengkap",new A.av6()),B.a2,s.mC(s.e,"Contoh: 220401050",B.md,"NIM (Nomor Induk Mahasiswa)",new A.av7()),B.a2,s.mC(s.r,"nama@student.kampus.ac.id",B.iR,"Email Kampus / Mahasiswa/i",new A.av8()),B.a2,s.mC(s.w,"081234567890",B.mi,"Nomor WhatsApp",new A.av9()),B.a2,s.q8(s.ch,"Jurusan",new A.ava(s),s.z),B.a2,s.q8(s.CW,"Program Studi",new A.avb(s),s.Q),B.a2,s.q8(s.cx,"Angkatan",new A.avc(s),s.as),B.a2,s.P7(s.x,"Kata Sandi",s.at,new A.avd(s)),B.a2,s.Es(s.y,"Konfirmasi Kata Sandi",s.ax,new A.ave(s),new A.avf(s))],t.p),B.l,B.h,B.f)},
 mC(a,b,c,d,e){var s=null
 return A.ah(A.b([A.D(d,s,s,s,$.d2().fh(13,B.N),s,s),B.bf,A.QP(a,A.hm(b,d,A.cH(c,B.A,s,20),s),1,!1,e)],t.p),B.t,B.h,B.f)},
 Es(a,b,c,d,e){var s=null,r=A.D(b,s,s,s,$.d2().fh(13,B.N),s,s),q=A.hm(s,b,B.Ma,A.pQ(s,s,A.cH(c?B.qs:B.qt,B.aK,s,s),s,s,d,s,s,s))
@@ -89615,17 +89615,17 @@ $0(){A.d_(this.a,!1).f8(null)
 return null},
 $S:0}
 A.auR.prototype={
-$1(a){return a==null||a.length===0?"NIM wajib diisi":null},
+$1(a){return a==null||a.length===0?"Nama lengkap wajib diisi":null},
 $S:24}
 A.auS.prototype={
-$1(a){return a==null||a.length===0?"Nama lengkap wajib diisi":null},
+$1(a){return a==null||a.length===0?"NIM wajib diisi":null},
 $S:24}
 A.auT.prototype={
 $1(a){if(a==null||!B.c.n(a,"@"))return"Format email tidak valid"
 return null},
 $S:24}
 A.auU.prototype={
-$1(a){return a==null||a.length<9?"No WhatsApp tidak valid":null},
+$1(a){return a==null||a.length<9?"Nomor WhatsApp tidak valid":null},
 $S:24}
 A.auV.prototype={
 $1(a){var s=this.a
@@ -89669,16 +89669,16 @@ $1(a){if(a!==this.a.x.a.a)return"Kata sandi tidak cocok"
 return null},
 $S:24}
 A.av6.prototype={
-$1(a){return a==null||a.length===0?"NIM wajib diisi":null},
+$1(a){return a==null||a.length===0?"Nama lengkap wajib diisi":null},
 $S:24}
 A.av7.prototype={
-$1(a){return a==null||a.length===0?"Nama lengkap wajib diisi":null},
+$1(a){return a==null||a.length===0?"NIM wajib diisi":null},
 $S:24}
 A.av8.prototype={
 $1(a){return a==null||!B.c.n(a,"@")?"Email tidak valid":null},
 $S:24}
 A.av9.prototype={
-$1(a){return a==null||a.length<9?"No WhatsApp tidak valid":null},
+$1(a){return a==null||a.length<9?"Nomor WhatsApp tidak valid":null},
 $S:24}
 A.ava.prototype={
 $1(a){var s=this.a
@@ -90511,7 +90511,7 @@ P8(a){var s,r,q=this,p=null,o=q.c.a
 o.toString
 s=$.i6()
 r=t.p
-return A.U(p,A.ah(A.b([A.ae(A.b([B.LY,B.b0,A.D("Data Kemahasiswaan",p,p,p,$.d2().hv(B.v),p,p)],r),B.l,B.h,B.f,0),B.f6,q.ou(B.KH,"NIM",o.b),q.ou(B.dq,"Nama Lengkap",o.c),q.ou(B.iR,"Email",o.d),q.ou(B.mi,"Nomor WhatsApp",o.w),q.ou(B.Ky,"Fakultas",o.e),q.ou(B.KJ,"Program Studi",o.f),q.ou(B.eK,"Angkatan",o.r)],r),B.t,B.h,B.f),B.i,p,p,s,p,p,p,B.dM,p,p,p)},
+return A.U(p,A.ah(A.b([A.ae(A.b([B.LY,B.b0,A.D("Data Kemahasiswaan",p,p,p,$.d2().hv(B.v),p,p)],r),B.l,B.h,B.f,0),B.f6,q.ou(B.KH,"NIM",o.b),q.ou(B.dq,"Nama Lengkap",o.c),q.ou(B.iR,"Email",o.d),q.ou(B.mi,"Nomor WhatsApp",o.w),q.ou(B.Ky,"Jurusan",o.e),q.ou(B.KJ,"Program Studi",o.f),q.ou(B.eK,"Angkatan",o.r)],r),B.t,B.h,B.f),B.i,p,p,s,p,p,p,B.dM,p,p,p)},
 ou(a,b,c){var s=null,r=A.Y(8),q=t.p
 return new A.b9(B.ll,A.ae(A.b([A.U(s,A.cH(a,B.A,s,16),B.i,s,s,new A.X(B.bk,s,s,r,s,s,B.o),s,s,s,B.it,s,s,s),B.aa,A.ah(A.b([A.D(b,s,s,s,$.bO().fh(11,B.N),s,s),A.D(c,s,s,s,$.d2().eZ(14),s,s)],q),B.t,B.h,B.f)],q),B.t,B.h,B.f,0),s)},
 OV(a){var s,r,q,p,o,n=this,m=null,l=n.c,k=l.ga_K().length,j=l.gM_(),i=l.gLZ()
@@ -100708,7 +100708,7 @@ B.a5y=new A.R5(0,"scope")
 B.nP=new A.R5(1,"previouslyFocusedChild")
 B.cO=new A.Rc(0,"mahasiswa")
 B.a5z=new A.rr("user_mhs_1","220401050","Muhammad Farhan Syahputra","farhan.syah@student.kampus.ac.id","Ilmu Komputer & TI","Teknik Informatika","2022","082167891234",B.cO,u._)
-B.a5A=new A.rr("user_mhs_1","220401050","Muhammad Farhan Syahputra","farhan.syah@student.kampus.ac.id","Ilmu Komputer & Teknologi Informasi","Teknik Informatika","2022","082167891234",B.cO,u._)
+B.a5A=new A.rr("user_mhs_1","220401050","Muhammad Farhan Syahputra","farhan.syah@student.kampus.ac.id","Teknologi Informasi dan Komputer","Teknologi Rekayasa Komputer dan Jaringan","2024","082167891234",B.cO,u._)
 B.cP=new A.Rc(1,"admin")
 B.a5B=new A.rr("user_admin_1","ADM-9901","Dr. Hendra Gunawan, M.T. (Panitia)","hendra.gunawan@kampus.ac.id","Biro Kemahasiswaan & Alumni","Pusat Karir & Kuliah Umum","Staff","081298765432",B.cP,"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150")
 B.fd=new A.Rf(!1)
