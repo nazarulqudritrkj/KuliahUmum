@@ -29,33 +29,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  String _selectedFakultas = 'Fakultas Ilmu Komputer & TI';
-  String _selectedProdi = 'Teknik Informatika';
+  String _selectedJurusan = 'Teknologi Informasi dan Komputer';
+  String _selectedProdi = 'Teknologi Rekayasa Multimedia';
   String _selectedAngkatan = '2024';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeTerms = true;
 
-  final List<String> _fakultasList = [
-    'Fakultas Ilmu Komputer & TI',
-    'Fakultas Teknik',
-    'Fakultas Ekonomi & Bisnis',
-    'Fakultas Kedokteran',
-    'Fakultas Hukum',
-    'Fakultas Ilmu Sosial & Politik',
+  final List<String> _jurusanList = [
+    'Teknologi Informasi dan Komputer',
   ];
 
   final List<String> _prodiList = [
+    'Teknologi Rekayasa Multimedia',
+    'Teknologi Rekayasa Komputer dan Jaringan',
     'Teknik Informatika',
-    'Sistem Informasi',
-    'Teknologi Informasi',
-    'Ilmu Komputer',
-    'Teknik Elektro',
-    'Manajemen Bisnis',
-    'Akuntansi',
+    'Teknologi Rekayasa Perangkat Lunak',
   ];
 
-  final List<String> _angkatanList = ['2021', '2022', '2023', '2024', '2025', '2026'];
+  final List<String> _angkatanList = ['2023', '2024', '2025', '2026'];
 
   @override
   void dispose() {
@@ -84,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         nim: _nimController.text.trim(),
         fullName: _nameController.text.trim(),
         email: _emailController.text.trim(),
-        fakultas: _selectedFakultas,
+        fakultas: _selectedJurusan,
         prodi: _selectedProdi,
         angkatan: _selectedAngkatan,
         phoneNumber: _phoneController.text.trim(),
@@ -301,21 +293,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             Expanded(
               child: _buildTextField(
-                label: 'Nomor Induk Mahasiswa (NIM)',
-                controller: _nimController,
-                hint: 'Contoh: 220401050',
-                icon: Icons.badge_outlined,
-                validator: (val) => val == null || val.isEmpty ? 'NIM wajib diisi' : null,
+                label: 'Nama Lengkap',
+                controller: _nameController,
+                hint: 'Masukkan nama lengkap',
+                icon: Icons.person_outline_rounded,
+                validator: (val) => val == null || val.isEmpty ? 'Nama lengkap wajib diisi' : null,
               ),
             ),
             const SizedBox(width: 20),
             Expanded(
               child: _buildTextField(
-                label: 'Nama Lengkap Mahasiswa',
-                controller: _nameController,
-                hint: 'Sesuai KTM / KTP',
-                icon: Icons.person_outline_rounded,
-                validator: (val) => val == null || val.isEmpty ? 'Nama lengkap wajib diisi' : null,
+                label: 'NIM (Nomor Induk Mahasiswa)',
+                controller: _nimController,
+                hint: 'Contoh: 220401050',
+                icon: Icons.badge_outlined,
+                validator: (val) => val == null || val.isEmpty ? 'NIM wajib diisi' : null,
               ),
             ),
           ],
@@ -325,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             Expanded(
               child: _buildTextField(
-                label: 'Email Kampus / Mahasiswa',
+                label: 'Email Kampus / Mahasiswa/i',
                 controller: _emailController,
                 hint: 'nama@student.kampus.ac.id',
                 icon: Icons.email_outlined,
@@ -338,11 +330,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(width: 20),
             Expanded(
               child: _buildTextField(
-                label: 'Nomor WhatsApp / HP',
+                label: 'Nomor WhatsApp',
                 controller: _phoneController,
                 hint: '081234567890',
                 icon: Icons.phone_android_rounded,
-                validator: (val) => val == null || val.length < 9 ? 'No WhatsApp tidak valid' : null,
+                validator: (val) => val == null || val.length < 9 ? 'Nomor WhatsApp tidak valid' : null,
               ),
             ),
           ],
@@ -351,15 +343,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Row(
           children: [
             Expanded(
+              flex: 2,
               child: _buildDropdown(
-                label: 'Fakultas',
-                value: _selectedFakultas,
-                items: _fakultasList,
-                onChanged: (val) => setState(() => _selectedFakultas = val!),
+                label: 'Jurusan',
+                value: _selectedJurusan,
+                items: _jurusanList,
+                onChanged: (val) => setState(() => _selectedJurusan = val!),
               ),
             ),
             const SizedBox(width: 20),
             Expanded(
+              flex: 2,
               child: _buildDropdown(
                 label: 'Program Studi',
                 value: _selectedProdi,
@@ -413,7 +407,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       children: [
         _buildTextField(
-          label: 'Nomor Induk Mahasiswa (NIM)',
+          label: 'Nama Lengkap',
+          controller: _nameController,
+          hint: 'Masukkan nama lengkap',
+          icon: Icons.person_outline_rounded,
+          validator: (val) => val == null || val.isEmpty ? 'Nama lengkap wajib diisi' : null,
+        ),
+        const SizedBox(height: 16),
+        _buildTextField(
+          label: 'NIM (Nomor Induk Mahasiswa)',
           controller: _nimController,
           hint: 'Contoh: 220401050',
           icon: Icons.badge_outlined,
@@ -421,15 +423,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Nama Lengkap Mahasiswa',
-          controller: _nameController,
-          hint: 'Sesuai KTM / KTP',
-          icon: Icons.person_outline_rounded,
-          validator: (val) => val == null || val.isEmpty ? 'Nama lengkap wajib diisi' : null,
-        ),
-        const SizedBox(height: 16),
-        _buildTextField(
-          label: 'Email Kampus / Mahasiswa',
+          label: 'Email Kampus / Mahasiswa/i',
           controller: _emailController,
           hint: 'nama@student.kampus.ac.id',
           icon: Icons.email_outlined,
@@ -437,18 +431,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Nomor WhatsApp / HP',
+          label: 'Nomor WhatsApp',
           controller: _phoneController,
           hint: '081234567890',
           icon: Icons.phone_android_rounded,
-          validator: (val) => val == null || val.length < 9 ? 'No WhatsApp tidak valid' : null,
+          validator: (val) => val == null || val.length < 9 ? 'Nomor WhatsApp tidak valid' : null,
         ),
         const SizedBox(height: 16),
         _buildDropdown(
-          label: 'Fakultas',
-          value: _selectedFakultas,
-          items: _fakultasList,
-          onChanged: (val) => setState(() => _selectedFakultas = val!),
+          label: 'Jurusan',
+          value: _selectedJurusan,
+          items: _jurusanList,
+          onChanged: (val) => setState(() => _selectedJurusan = val!),
         ),
         const SizedBox(height: 16),
         _buildDropdown(

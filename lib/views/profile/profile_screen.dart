@@ -193,7 +193,7 @@ class ProfileScreen extends StatelessWidget {
           _buildDetailRow(Icons.person_outline_rounded, 'Nama Lengkap', user.fullName),
           _buildDetailRow(Icons.email_outlined, 'Email', user.email),
           _buildDetailRow(Icons.phone_android_rounded, 'Nomor WhatsApp', user.phoneNumber),
-          _buildDetailRow(Icons.account_balance_rounded, 'Fakultas', user.fakultas),
+          _buildDetailRow(Icons.account_balance_rounded, 'Jurusan', user.fakultas),
           _buildDetailRow(Icons.book_rounded, 'Program Studi', user.prodi),
           _buildDetailRow(Icons.school_rounded, 'Angkatan', user.angkatan),
         ],
