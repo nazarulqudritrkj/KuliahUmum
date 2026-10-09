@@ -5,6 +5,7 @@ import '../../core/constants/app_styles.dart';
 import '../../core/models/user_model.dart';
 import '../../core/services/app_state_service.dart';
 import '../../core/utils/responsive_layout.dart';
+import '../../core/widgets/galaxy_animation.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -80,175 +81,182 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildSplitLayout(BuildContext context, {required bool isTablet}) {
     return Row(
       children: [
-        // Left Hero Branding Panel (Ungu Terang & Kuning Matahari)
+        // ── Left Galaxy Hero Panel ──────────────────────────────────────────
         Expanded(
           flex: isTablet ? 4 : 5,
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: AppColors.heroGradient,
-            ),
-            child: Stack(
-              children: [
-                // Background decorative glowing circles
-                Positioned(
-                  top: -80,
-                  right: -80,
-                  child: Container(
-                    width: 320,
-                    height: 320,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.sunYellow.withValues(alpha: 0.18),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: -60,
-                  left: -60,
-                  child: Container(
-                    width: 280,
-                    height: 280,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primaryPurpleLight.withValues(alpha: 0.3),
-                    ),
-                  ),
-                ),
-
-                // Content
-                Padding(
-                  padding: const EdgeInsets.all(48.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Brand Logo Header
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.sunYellow,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: AppColors.yellowGlow,
-                                  blurRadius: 15,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.school_rounded,
-                              color: AppColors.darkSidebar,
-                              size: 30,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'SIM-KU',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              Text(
-                                'Portal Kuliah Umum Mahasiswa',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.sunYellowLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      // Middle Illustration & Headline
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+          child: SideGalaxyPanel(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: EdgeInsets.all(isTablet ? 32.0 : 48.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Brand Logo Header
+                            Row(
                               children: [
-                                const Icon(Icons.stars_rounded, color: AppColors.sunYellow, size: 18),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Sistem Presensi & E-Sertifikat Terpadu',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.sunYellow,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.sunYellow.withValues(alpha: 0.5),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.school_rounded,
+                                    color: Color(0xFF1A0A3E),
+                                    size: 30,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'SIM-KU',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                          letterSpacing: 1.5,
+                                          shadows: [
+                                            Shadow(
+                                              color: AppColors.sunYellow.withValues(alpha: 0.5),
+                                              blurRadius: 12,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        'Portal Kuliah Umum Mahasiswa',
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color(0xFFB8AAFF),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Wujudkan Wawasan Global & Prestasi Akademik',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: isTablet ? 26 : 34,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              height: 1.25,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Akses ratusan kuliah umum dari tokoh inspiratif nasional & internasional. Presensi instan dengan QR Code dan unduh E-Sertifikat resmi secara otomatis.',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15,
-                              color: Colors.white.withValues(alpha: 0.85),
-                              height: 1.6,
-                            ),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(height: 32),
 
-                      // Feature Mini Badges
-                      Row(
-                        children: [
-                          _buildFeatureBadge(Icons.qr_code_scanner_rounded, 'Tiket QR Instan'),
-                          const SizedBox(width: 16),
-                          _buildFeatureBadge(Icons.verified_rounded, 'E-Sertifikat Otomatis'),
-                          const SizedBox(width: 16),
-                          _buildFeatureBadge(Icons.auto_graph_rounded, 'Riwayat Terpadu'),
-                        ],
+                            // Middle Illustration & Headline
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(30),
+                                    border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.sunYellow.withValues(alpha: 0.12),
+                                        blurRadius: 20,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.auto_awesome, color: AppColors.sunYellow, size: 16),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          'Sistem Presensi & E-Sertifikat Terpadu',
+                                          style: GoogleFonts.plusJakartaSans(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  'Wujudkan Wawasan Global & Prestasi Akademik',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: isTablet ? 24 : 32,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    height: 1.25,
+                                    shadows: [
+                                      Shadow(
+                                        color: const Color(0xFF7C3AED).withValues(alpha: 0.6),
+                                        blurRadius: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Akses ratusan kuliah umum dari tokoh inspiratif nasional & internasional. Presensi instan dengan QR Code dan unduh E-Sertifikat resmi secara otomatis.',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14,
+                                    color: const Color(0xFFCDC8FF),
+                                    height: 1.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+
+                            // Feature Mini Badges
+                            Row(
+                              children: [
+                                _buildFeatureBadge(Icons.qr_code_scanner_rounded, 'Tiket QR Instan'),
+                                const SizedBox(width: 10),
+                                _buildFeatureBadge(Icons.verified_rounded, 'E-Sertifikat Otomatis'),
+                                const SizedBox(width: 10),
+                                _buildFeatureBadge(Icons.auto_graph_rounded, 'Riwayat Terpadu'),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),
 
-        // Right Form Panel
+        // ── Right Form Panel ─────────────────────────────────────────────────
         Expanded(
           flex: isTablet ? 5 : 5,
-          child: Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: isTablet ? 36 : 64,
-                vertical: 40,
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 480),
-                child: _buildFormCard(context),
+          child: Container(
+            color: const Color(0xFF0D0A1E),
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isTablet ? 36 : 64,
+                  vertical: 40,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  child: _buildFormCard(context),
+                ),
               ),
             ),
           ),
@@ -262,9 +270,16 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF7C3AED).withValues(alpha: 0.15),
+              blurRadius: 12,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -274,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
               label,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
-                color: Colors.white,
+                color: const Color(0xFFE0D8FF),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -368,16 +383,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildFormCard(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF130D2E),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0F7C3AED),
-            blurRadius: 30,
-            offset: Offset(0, 10),
+            color: const Color(0xFF7C3AED).withValues(alpha: 0.25),
+            blurRadius: 40,
+            offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: const Color(0xFF2D1F5E), width: 1.5),
       ),
       padding: const EdgeInsets.all(32),
       child: Form(
@@ -389,12 +404,12 @@ class _LoginScreenState extends State<LoginScreen> {
             if (!ResponsiveLayout.isMobile(context)) ...[
               Text(
                 'Selamat Datang! 👋',
-                style: AppStyles.heading2.copyWith(color: AppColors.textPrimary),
+                style: AppStyles.heading2.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 8),
               Text(
                 'Masukkan kredensial akun Anda untuk mengakses portal kuliah umum.',
-                style: AppStyles.bodyMedium,
+                style: AppStyles.bodyMedium.copyWith(color: const Color(0xFF9D8FCC)),
               ),
               const SizedBox(height: 24),
             ],
@@ -403,9 +418,9 @@ class _LoginScreenState extends State<LoginScreen> {
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: AppColors.purpleSurface,
+                color: const Color(0xFF1E1040),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.primaryPurpleLight.withValues(alpha: 0.2)),
+                border: Border.all(color: const Color(0xFF3D2880)),
               ),
               child: Row(
                 children: [
@@ -443,18 +458,25 @@ class _LoginScreenState extends State<LoginScreen> {
             // Identifier Input (NIM / Email)
             Text(
               _selectedRole == UserRole.mahasiswa ? 'NIM atau Email Kampus' : 'NIP / ID Admin',
-              style: AppStyles.bodyLarge.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+              style: AppStyles.bodyLarge.copyWith(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFFCDC8FF)),
             ),
             const SizedBox(height: 8),
             TextFormField(
               controller: _identifierController,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
               decoration: AppStyles.inputDecoration(
-                labelText: _selectedRole == UserRole.mahasiswa ? 'Nomor Induk Mahasiswa (NIM)' : 'ID Administrator',
-                hintText: _selectedRole == UserRole.mahasiswa ? 'Contoh: 220401050' : 'Contoh: ADM-9901',
-                prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.primaryPurple),
+                labelText: '',
+                hintText: _selectedRole == UserRole.mahasiswa ? 'Contoh: 220401050 atau email' : 'Contoh: ADM-9901',
+                prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.primaryPurple, size: 20),
+              ).copyWith(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               validator: (val) {
-                if (val == null || val.isEmpty) {
+                if (val == null || val.trim().isEmpty) {
                   return 'Harap masukkan NIM atau Email Anda';
                 }
                 return null;
@@ -468,7 +490,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Text(
                   'Kata Sandi',
-                  style: AppStyles.bodyLarge.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+                  style: AppStyles.bodyLarge.copyWith(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFFCDC8FF)),
                 ),
                 TextButton(
                   onPressed: () => _showForgotPasswordDialog(context),
@@ -482,7 +504,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primaryPurple,
+                      color: const Color(0xFFA78BFA),
                     ),
                   ),
                 ),
@@ -492,13 +514,20 @@ class _LoginScreenState extends State<LoginScreen> {
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
               decoration: AppStyles.inputDecoration(
-                labelText: 'Kata Sandi',
-                prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primaryPurple),
+                labelText: '',
+                hintText: '••••••••',
+                prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primaryPurple, size: 20),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
                     color: AppColors.textMuted,
+                    size: 20,
                   ),
                   onPressed: () {
                     setState(() {
@@ -506,6 +535,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   },
                 ),
+              ).copyWith(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               validator: (val) {
                 if (val == null || val.length < 6) {
@@ -525,14 +556,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Checkbox(
                     value: _rememberMe,
                     activeColor: AppColors.primaryPurple,
+                    checkColor: Colors.white,
+                    side: const BorderSide(color: Color(0xFF5B3F9A)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     onChanged: (v) => setState(() => _rememberMe = v ?? true),
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Ingat saya di perangkat ini',
-                  style: AppStyles.bodyMedium.copyWith(fontSize: 13),
+                Expanded(
+                  child: Text(
+                    'Ingat saya di perangkat ini',
+                    style: AppStyles.bodyMedium.copyWith(fontSize: 13, color: const Color(0xFF9D8FCC)),
+                  ),
                 ),
               ],
             ),
@@ -582,15 +617,15 @@ class _LoginScreenState extends State<LoginScreen> {
             // Divider or Register Link
             Row(
               children: [
-                const Expanded(child: Divider(color: AppColors.border)),
+                const Expanded(child: Divider(color: Color(0xFF2D1F5E))),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     'Belum punya akun?',
-                    style: AppStyles.bodySmall,
+                    style: AppStyles.bodySmall.copyWith(color: const Color(0xFF7B6FBB)),
                   ),
                 ),
-                const Expanded(child: Divider(color: AppColors.border)),
+                const Expanded(child: Divider(color: Color(0xFF2D1F5E))),
               ],
             ),
             const SizedBox(height: 16),
@@ -611,14 +646,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 },
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.primaryPurpleLight, width: 1.5),
+                  side: const BorderSide(color: Color(0xFF4C35A0), width: 1.5),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  backgroundColor: AppColors.purpleSurface.withValues(alpha: 0.5),
+                  backgroundColor: const Color(0xFF1A0F3D),
                 ),
                 child: Text(
                   'Daftar Akun Mahasiswa Baru',
                   style: GoogleFonts.plusJakartaSans(
-                    color: AppColors.primaryPurpleDark,
+                    color: const Color(0xFFA78BFA),
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),

@@ -56,6 +56,7 @@ class SupabaseService {
         data: {
           'full_name': fullName,
           'nim': nim,
+          'jurusan': fakultas,
           'fakultas': fakultas,
           'prodi': prodi,
           'angkatan': angkatan,

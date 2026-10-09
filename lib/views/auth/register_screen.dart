@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_styles.dart';
 import '../../core/services/app_state_service.dart';
 import '../../core/utils/responsive_layout.dart';
+import '../../core/widgets/galaxy_animation.dart';
 
 class RegisterScreen extends StatefulWidget {
   final AppStateService stateService;
@@ -110,37 +111,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFF06030F),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFFCDC8FF)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Registrasi Mahasiswa Baru', style: AppStyles.heading3),
+        title: Text(
+          'Registrasi Mahasiswa Baru',
+          style: AppStyles.heading3.copyWith(color: Colors.white),
+        ),
         centerTitle: false,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 780),
-            child: Container(
-              padding: const EdgeInsets.all(36),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x0F7C3AED),
-                    blurRadius: 30,
-                    offset: Offset(0, 8),
+      body: GalaxyBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 780),
+              child: Container(
+                padding: const EdgeInsets.all(36),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0E0A28).withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF7C3AED).withValues(alpha: 0.30),
+                      blurRadius: 50,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: const Color(0xFF2D1F5E),
+                    width: 1.5,
                   ),
-                ],
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Form(
+                ),
+                child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,13 +159,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
-                            gradient: AppColors.sunGradient,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)],
+                            ),
                             borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF7C3AED).withValues(alpha: 0.4),
+                                blurRadius: 16,
+                                spreadRadius: 1,
+                              ),
+                            ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.verified_user_rounded, color: Colors.white, size: 16),
+                              const Icon(Icons.auto_awesome, color: Colors.white, size: 16),
                               const SizedBox(width: 6),
                               Text(
                                 'Verifikasi Data Akademik',
@@ -173,12 +190,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
-                    Text('Formulir Pendaftaran Mahasiswa', style: AppStyles.heading2),
+                    Text(
+                      'Formulir Pendaftaran Mahasiswa',
+                      style: AppStyles.heading2.copyWith(color: Colors.white),
+                    ),
                     const SizedBox(height: 6),
                     Text(
                       'Lengkapi data identitas kemahasiswaan Anda untuk pendaftaran kuliah umum dan penerbitan sertifikat digital resmi.',
-                      style: AppStyles.bodyMedium,
+                      style: AppStyles.bodyMedium.copyWith(color: const Color(0xFF9D8FCC)),
                     ),
                     const SizedBox(height: 28),
 
@@ -199,6 +218,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Checkbox(
                             value: _agreeTerms,
                             activeColor: AppColors.primaryPurple,
+                            checkColor: Colors.white,
+                            side: const BorderSide(color: Color(0xFF5B3F9A)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                             onChanged: (v) => setState(() => _agreeTerms = v ?? true),
                           ),
@@ -207,7 +228,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Expanded(
                           child: Text(
                             'Saya menyatakan bahwa data kemahasiswaan yang diinput adalah benar dan bersedia mematuhi tata tertib kuliah umum.',
-                            style: AppStyles.bodySmall.copyWith(color: AppColors.textSecondary, height: 1.4),
+                            style: AppStyles.bodySmall.copyWith(color: const Color(0xFF9D8FCC), height: 1.4),
                           ),
                         ),
                       ],
@@ -262,12 +283,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: RichText(
                           text: TextSpan(
                             text: 'Sudah memiliki akun terdaftar? ',
-                            style: AppStyles.bodyMedium,
+                            style: AppStyles.bodyMedium.copyWith(color: const Color(0xFF7B6FBB)),
                             children: [
                               TextSpan(
                                 text: 'Masuk Sekarang',
                                 style: GoogleFonts.plusJakartaSans(
-                                  color: AppColors.primaryPurple,
+                                  color: const Color(0xFFA78BFA),
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -281,6 +302,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
           ),
+          ),
         ),
       ),
     );
@@ -288,7 +310,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildDesktopInputs() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Row 1: Nama Lengkap & NIM
         Row(
           children: [
             Expanded(
@@ -297,22 +321,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _nameController,
                 hint: 'Masukkan nama lengkap',
                 icon: Icons.person_outline_rounded,
-                validator: (val) => val == null || val.isEmpty ? 'Nama lengkap wajib diisi' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'Nama lengkap wajib diisi' : null,
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildTextField(
                 label: 'NIM (Nomor Induk Mahasiswa)',
                 controller: _nimController,
                 hint: 'Contoh: 220401050',
                 icon: Icons.badge_outlined,
-                validator: (val) => val == null || val.isEmpty ? 'NIM wajib diisi' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'NIM wajib diisi' : null,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
+
+        // Row 2: Email & WhatsApp
         Row(
           children: [
             Expanded(
@@ -327,23 +353,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 },
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildTextField(
                 label: 'Nomor WhatsApp',
                 controller: _phoneController,
                 hint: '081234567890',
                 icon: Icons.phone_android_rounded,
-                validator: (val) => val == null || val.length < 9 ? 'Nomor WhatsApp tidak valid' : null,
+                validator: (val) => val == null || val.trim().length < 9 ? 'Nomor WhatsApp tidak valid' : null,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
+
+        // Row 3: Jurusan & Angkatan
         Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 3,
               child: _buildDropdown(
                 label: 'Jurusan',
                 value: _selectedJurusan,
@@ -351,19 +379,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onChanged: (val) => setState(() => _selectedJurusan = val!),
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
-              flex: 2,
-              child: _buildDropdown(
-                label: 'Program Studi',
-                value: _selectedProdi,
-                items: _prodiList,
-                onChanged: (val) => setState(() => _selectedProdi = val!),
-              ),
-            ),
-            const SizedBox(width: 20),
-            SizedBox(
-              width: 140,
+              flex: 1,
               child: _buildDropdown(
                 label: 'Angkatan',
                 value: _selectedAngkatan,
@@ -373,7 +391,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
+
+        // Row 4: Program Studi (Full width for long prodi names)
+        _buildDropdown(
+          label: 'Program Studi',
+          value: _selectedProdi,
+          items: _prodiList,
+          onChanged: (val) => setState(() => _selectedProdi = val!),
+        ),
+        const SizedBox(height: 16),
+
+        // Row 5: Kata Sandi & Konfirmasi Kata Sandi
         Row(
           children: [
             Expanded(
@@ -384,7 +413,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildPasswordField(
                 label: 'Konfirmasi Kata Sandi',
@@ -405,23 +434,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildMobileInputs() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildTextField(
           label: 'Nama Lengkap',
           controller: _nameController,
           hint: 'Masukkan nama lengkap',
           icon: Icons.person_outline_rounded,
-          validator: (val) => val == null || val.isEmpty ? 'Nama lengkap wajib diisi' : null,
+          validator: (val) => val == null || val.trim().isEmpty ? 'Nama lengkap wajib diisi' : null,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildTextField(
           label: 'NIM (Nomor Induk Mahasiswa)',
           controller: _nimController,
           hint: 'Contoh: 220401050',
           icon: Icons.badge_outlined,
-          validator: (val) => val == null || val.isEmpty ? 'NIM wajib diisi' : null,
+          validator: (val) => val == null || val.trim().isEmpty ? 'NIM wajib diisi' : null,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildTextField(
           label: 'Email Kampus / Mahasiswa/i',
           controller: _emailController,
@@ -429,43 +459,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
           icon: Icons.email_outlined,
           validator: (val) => val == null || !val.contains('@') ? 'Email tidak valid' : null,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildTextField(
           label: 'Nomor WhatsApp',
           controller: _phoneController,
           hint: '081234567890',
           icon: Icons.phone_android_rounded,
-          validator: (val) => val == null || val.length < 9 ? 'Nomor WhatsApp tidak valid' : null,
+          validator: (val) => val == null || val.trim().length < 9 ? 'Nomor WhatsApp tidak valid' : null,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildDropdown(
           label: 'Jurusan',
           value: _selectedJurusan,
           items: _jurusanList,
           onChanged: (val) => setState(() => _selectedJurusan = val!),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildDropdown(
           label: 'Program Studi',
           value: _selectedProdi,
           items: _prodiList,
           onChanged: (val) => setState(() => _selectedProdi = val!),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildDropdown(
           label: 'Angkatan',
           value: _selectedAngkatan,
           items: _angkatanList,
           onChanged: (val) => setState(() => _selectedAngkatan = val!),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildPasswordField(
           label: 'Kata Sandi',
           controller: _passwordController,
           obscure: _obscurePassword,
           onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _buildPasswordField(
           label: 'Konfirmasi Kata Sandi',
           controller: _confirmPasswordController,
@@ -487,14 +517,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppStyles.bodyLarge.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: AppStyles.bodyLarge.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFFCDC8FF),
+          ),
+        ),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
           decoration: AppStyles.inputDecoration(
-            labelText: label,
+            labelText: '',
             hintText: hint,
             prefixIcon: Icon(icon, color: AppColors.primaryPurple, size: 20),
+          ).copyWith(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
           validator: validator,
         ),
@@ -512,18 +556,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppStyles.bodyLarge.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: AppStyles.bodyLarge.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFFCDC8FF),
+          ),
+        ),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           obscureText: obscure,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
           decoration: AppStyles.inputDecoration(
-            labelText: label,
+            labelText: '',
+            hintText: '••••••••',
             prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primaryPurple, size: 20),
             suffixIcon: IconButton(
-              icon: Icon(obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppColors.textMuted),
+              icon: Icon(
+                obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: AppColors.textMuted,
+                size: 20,
+              ),
               onPressed: onToggle,
             ),
+          ).copyWith(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
           validator: validator ?? (val) => val == null || val.length < 6 ? 'Minimal 6 karakter' : null,
         ),
@@ -540,15 +603,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppStyles.bodyLarge.copyWith(fontSize: 13, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: AppStyles.bodyLarge.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFFCDC8FF),
+          ),
+        ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          initialValue: value,
-          decoration: AppStyles.inputDecoration(labelText: label),
+          initialValue: items.contains(value) ? value : items.first,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primaryPurple),
+          decoration: AppStyles.inputDecoration(labelText: '').copyWith(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
           items: items.map((item) {
-            return DropdownMenuItem(
+            return DropdownMenuItem<String>(
               value: item,
-              child: Text(item, style: AppStyles.bodyLarge.copyWith(fontSize: 14)),
+              child: Text(
+                item,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             );
           }).toList(),
           onChanged: onChanged,

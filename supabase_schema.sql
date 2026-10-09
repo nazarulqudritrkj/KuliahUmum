@@ -1,6 +1,7 @@
 -- ==============================================================================
 -- SISTEM INFORMASI MAHASISWA KULIAH UMUM (SIM-KU)
--- Database Schema & Initial Migration for Supabase (PostgreSQL)
+-- Database Schema & Migration for Supabase (PostgreSQL)
+-- Versi: Terintegrasi Jurusan TIK, 4 Program Studi, & Angkatan 2023-2026
 -- ==============================================================================
 
 -- 1. EXTENSIONS
@@ -18,15 +19,22 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     nim TEXT UNIQUE,
     full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    fakultas TEXT DEFAULT '',
-    prodi TEXT DEFAULT '',
-    angkatan TEXT DEFAULT '',
+    jurusan TEXT DEFAULT 'Teknologi Informasi dan Komputer',
+    fakultas TEXT DEFAULT 'Teknologi Informasi dan Komputer',
+    prodi TEXT DEFAULT 'Teknologi Rekayasa Multimedia',
+    angkatan TEXT DEFAULT '2024',
     phone_number TEXT DEFAULT '',
     role TEXT NOT NULL DEFAULT 'mahasiswa' CHECK (role IN ('mahasiswa', 'admin')),
     avatar_url TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+-- Migrasi kolom jika tabel profiles sudah terlanjur dibuat sebelumnya
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS jurusan TEXT DEFAULT 'Teknologi Informasi dan Komputer';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS fakultas TEXT DEFAULT 'Teknologi Informasi dan Komputer';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS prodi TEXT DEFAULT 'Teknologi Rekayasa Multimedia';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS angkatan TEXT DEFAULT '2024';
 
 -- 2.2 TABEL EVENTS (Kuliah Umum)
 CREATE TABLE IF NOT EXISTS public.events (
@@ -95,7 +103,7 @@ CREATE TABLE IF NOT EXISTS public.certificates (
 );
 
 -- ==============================================================================
--- 3. FUNCTIONS & TRIGGERS
+-- 3. FUNCTIONS & TRIGGERS (OTOMATISASI DATABASE)
 -- ==============================================================================
 
 -- 3.1 Trigger otomatis sinkronisasi jumlah pendaftar (registered_count) di tabel events
@@ -135,7 +143,7 @@ CREATE TRIGGER trg_update_event_registered_count
     AFTER INSERT OR UPDATE OR DELETE ON public.registrations
     FOR EACH ROW EXECUTE FUNCTION public.update_event_registered_count();
 
--- 3.2 Trigger otomatis membuat record di profiles saat ada pendaftaran akun di auth.users
+-- 3.2 Trigger otomatis membuat record di profiles saat mahasiswa register di auth.users Supabase
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -144,6 +152,7 @@ BEGIN
         email, 
         full_name, 
         nim, 
+        jurusan,
         fakultas, 
         prodi, 
         angkatan, 
@@ -155,15 +164,21 @@ BEGIN
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'full_name', 'Mahasiswa'),
         COALESCE(NEW.raw_user_meta_data->>'nim', ''),
-        COALESCE(NEW.raw_user_meta_data->>'fakultas', 'Ilmu Komputer'),
-        COALESCE(NEW.raw_user_meta_data->>'prodi', 'Teknik Informatika'),
-        COALESCE(NEW.raw_user_meta_data->>'angkatan', '2022'),
+        COALESCE(NEW.raw_user_meta_data->>'jurusan', NEW.raw_user_meta_data->>'fakultas', 'Teknologi Informasi dan Komputer'),
+        COALESCE(NEW.raw_user_meta_data->>'jurusan', NEW.raw_user_meta_data->>'fakultas', 'Teknologi Informasi dan Komputer'),
+        COALESCE(NEW.raw_user_meta_data->>'prodi', 'Teknologi Rekayasa Multimedia'),
+        COALESCE(NEW.raw_user_meta_data->>'angkatan', '2024'),
         COALESCE(NEW.raw_user_meta_data->>'phone_number', ''),
         COALESCE(NEW.raw_user_meta_data->>'role', 'mahasiswa')
     )
     ON CONFLICT (id) DO UPDATE SET
         full_name = EXCLUDED.full_name,
-        nim = EXCLUDED.nim;
+        nim = EXCLUDED.nim,
+        jurusan = EXCLUDED.jurusan,
+        fakultas = EXCLUDED.fakultas,
+        prodi = EXCLUDED.prodi,
+        angkatan = EXCLUDED.angkatan,
+        phone_number = EXCLUDED.phone_number;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -183,7 +198,7 @@ ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.feedbacks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
 
--- 4.1 Policies untuk Events (Dapat dilihat siapa saja, modifikasi oleh pengguna terautentikasi)
+-- 4.1 Policies untuk Events
 DROP POLICY IF EXISTS "Events are viewable by everyone" ON public.events;
 CREATE POLICY "Events are viewable by everyone" 
     ON public.events FOR SELECT USING (true);
