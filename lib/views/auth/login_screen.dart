@@ -24,10 +24,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _identifierController = TextEditingController(text: '220401050');
-  final _passwordController = TextEditingController(text: 'password123');
+  final _identifierController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = true;
+  bool _isSubmitting = false;
   UserRole _selectedRole = UserRole.mahasiswa;
 
   @override
@@ -37,32 +38,61 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      widget.stateService.login(
+      setState(() => _isSubmitting = true);
+
+      final result = await widget.stateService.login(
         _identifierController.text,
         _passwordController.text,
         role: _selectedRole,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.primaryPurple,
-          behavior: SnackBarBehavior.floating,
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle_rounded, color: AppColors.sunYellow),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Selamat datang kembali, ${widget.stateService.currentUser?.fullName}!',
-                  style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w600),
+
+      setState(() => _isSubmitting = false);
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.primaryPurple,
+            behavior: SnackBarBehavior.floating,
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: AppColors.sunYellow),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    result['message'] ?? 'Selamat datang kembali!',
+                    style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-      widget.onLoginSuccess();
+        );
+        widget.onLoginSuccess();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.danger,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline_rounded, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    result['message'] ?? 'Gagal masuk. Akun belum terdaftar di sistem.',
+                    style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -432,7 +462,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () {
                         setState(() {
                           _selectedRole = UserRole.mahasiswa;
-                          _identifierController.text = '220401050';
+                          _identifierController.clear();
+                          _passwordController.clear();
                         });
                       },
                     ),
@@ -445,7 +476,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () {
                         setState(() {
                           _selectedRole = UserRole.admin;
-                          _identifierController.text = 'ADM-9901';
+                          _identifierController.clear();
+                          _passwordController.clear();
                         });
                       },
                     ),
@@ -470,7 +502,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               decoration: AppStyles.inputDecoration(
                 labelText: '',
-                hintText: _selectedRole == UserRole.mahasiswa ? 'Contoh: 220401050 atau email' : 'Contoh: ADM-9901',
+                hintText: _selectedRole == UserRole.mahasiswa ? 'Masukkan NIM atau Email Anda' : 'Masukkan ID / Email Admin',
                 prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.primaryPurple, size: 20),
               ).copyWith(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -521,7 +553,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               decoration: AppStyles.inputDecoration(
                 labelText: '',
-                hintText: '••••••••',
+                hintText: 'Masukkan kata sandi',
                 prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primaryPurple, size: 20),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -589,27 +621,33 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               child: ElevatedButton(
-                onPressed: _handleLogin,
+                onPressed: _isSubmitting ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Masuk ke Sistem',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Masuk ke Sistem',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, color: AppColors.sunYellow, size: 20),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded, color: AppColors.sunYellow, size: 20),
-                  ],
-                ),
               ),
             ),
             const SizedBox(height: 24),

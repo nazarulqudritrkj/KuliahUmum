@@ -89,6 +89,35 @@ class SupabaseService {
     }
   }
 
+  /// Mengambil profil pengguna berdasarkan user id
+  static Future<Map<String, dynamic>?> fetchProfileByUserId(String userId) async {
+    final c = client;
+    if (c == null) return null;
+    try {
+      final res = await c.from('profiles').select().eq('id', userId).maybeSingle();
+      return res;
+    } catch (e) {
+      debugPrint('Fetch profile by ID error: $e');
+      return null;
+    }
+  }
+
+  /// Mengambil email berdasarkan NIM dari tabel profiles
+  static Future<String?> findEmailByNim(String nim) async {
+    final c = client;
+    if (c == null) return null;
+    try {
+      final res = await c.from('profiles').select('email').eq('nim', nim).maybeSingle();
+      if (res != null && res['email'] != null) {
+        return res['email'] as String;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Find email by NIM error: $e');
+      return null;
+    }
+  }
+
   /// Logout dari Supabase
   static Future<void> signOut() async {
     final c = client;

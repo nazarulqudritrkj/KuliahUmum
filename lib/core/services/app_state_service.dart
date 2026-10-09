@@ -157,48 +157,107 @@ class AppStateService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Authentication: Login
-  Future<bool> login(String identifier, String password, {UserRole role = UserRole.mahasiswa}) async {
+  // Registered Users Cache for session and fallback
+  final Map<String, UserModel> _registeredUsers = {};
+
+  // Authentication: Strict Login
+  Future<Map<String, dynamic>> login(String identifier, String password, {UserRole role = UserRole.mahasiswa}) async {
     _isLoading = true;
     notifyListeners();
 
+    final cleanId = identifier.trim();
+    final cleanPass = password.trim();
+
     try {
-      if (identifier.contains('@')) {
-        await SupabaseService.signIn(email: identifier, password: password);
+      String emailToAuth = cleanId;
+
+      // If logging in with NIM, find associated email
+      if (!cleanId.contains('@')) {
+        final emailFromSupabase = await SupabaseService.findEmailByNim(cleanId);
+        if (emailFromSupabase != null && emailFromSupabase.isNotEmpty) {
+          emailToAuth = emailFromSupabase;
+        } else if (_registeredUsers.containsKey(cleanId.toLowerCase())) {
+          emailToAuth = _registeredUsers[cleanId.toLowerCase()]!.email;
+        }
       }
 
-      final isIdentifierAdmin = role == UserRole.admin || identifier.toLowerCase().startsWith('adm');
-      _currentUser = UserModel(
-        id: 'usr_${identifier.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}',
-        nim: isIdentifierAdmin ? identifier : (identifier.contains('@') ? '' : identifier),
-        fullName: isIdentifierAdmin ? 'Administrator ($identifier)' : (identifier.contains('@') ? identifier.split('@').first : 'Mahasiswa ($identifier)'),
-        email: identifier.contains('@') ? identifier : '$identifier@student.kampus.ac.id',
-        fakultas: isIdentifierAdmin ? 'Biro Administrasi Akademik' : 'Teknologi Informasi dan Komputer',
-        prodi: isIdentifierAdmin ? 'Panitia Kuliah Umum' : 'Teknologi Rekayasa Multimedia',
-        angkatan: isIdentifierAdmin ? 'Staff' : '2024',
-        phoneNumber: '',
-        role: isIdentifierAdmin ? UserRole.admin : UserRole.mahasiswa,
-      );
-      _isAuthenticated = true;
-      return true;
-    } catch (e) {
-      debugPrint('Login notice: $e');
-      _currentUser = UserModel(
-        id: 'usr_${identifier.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}',
-        nim: identifier.contains('@') ? '' : identifier,
-        fullName: identifier.contains('@') ? identifier.split('@').first : 'Pengguna ($identifier)',
-        email: identifier.contains('@') ? identifier : '$identifier@student.kampus.ac.id',
-        fakultas: role == UserRole.admin ? 'Biro Kemahasiswaan' : 'Teknologi Informasi dan Komputer',
-        prodi: role == UserRole.admin ? 'Panitia' : 'Teknik Informatika',
-        angkatan: role == UserRole.admin ? 'Staff' : '2024',
-        phoneNumber: '',
-        role: role,
-      );
-      _isAuthenticated = true;
-      return true;
-    } finally {
+      // Attempt Supabase Cloud Sign In
+      if (emailToAuth.contains('@')) {
+        final authResponse = await SupabaseService.signIn(email: emailToAuth, password: cleanPass);
+        if (authResponse != null && authResponse.user != null) {
+          final userId = authResponse.user!.id;
+          final profileData = await SupabaseService.fetchProfileByUserId(userId);
+
+          if (profileData != null) {
+            _currentUser = UserModel(
+              id: userId,
+              nim: profileData['nim'] ?? cleanId,
+              fullName: profileData['full_name'] ?? 'Mahasiswa',
+              email: profileData['email'] ?? emailToAuth,
+              fakultas: profileData['fakultas'] ?? profileData['jurusan'] ?? 'Teknologi Informasi dan Komputer',
+              prodi: profileData['prodi'] ?? 'Teknologi Rekayasa Multimedia',
+              angkatan: profileData['angkatan'] ?? '2024',
+              phoneNumber: profileData['phone_number'] ?? '',
+              role: (profileData['role'] == 'admin' || role == UserRole.admin) ? UserRole.admin : UserRole.mahasiswa,
+              avatarUrl: profileData['avatar_url'] ?? '',
+            );
+          } else {
+            final metadata = authResponse.user!.userMetadata ?? {};
+            _currentUser = UserModel(
+              id: userId,
+              nim: metadata['nim'] ?? cleanId,
+              fullName: metadata['full_name'] ?? 'Mahasiswa',
+              email: emailToAuth,
+              fakultas: metadata['fakultas'] ?? 'Teknologi Informasi dan Komputer',
+              prodi: metadata['prodi'] ?? 'Teknologi Rekayasa Multimedia',
+              angkatan: metadata['angkatan'] ?? '2024',
+              phoneNumber: metadata['phone_number'] ?? '',
+              role: role,
+            );
+          }
+
+          _isAuthenticated = true;
+          _isLoading = false;
+          notifyListeners();
+          return {'success': true, 'message': 'Selamat datang kembali, ${_currentUser!.fullName}!'};
+        }
+      }
+
+      // Check in-session registered users
+      if (_registeredUsers.containsKey(cleanId.toLowerCase()) || _registeredUsers.containsKey(emailToAuth.toLowerCase())) {
+        final user = _registeredUsers[cleanId.toLowerCase()] ?? _registeredUsers[emailToAuth.toLowerCase()]!;
+        _currentUser = user;
+        _isAuthenticated = true;
+        _isLoading = false;
+        notifyListeners();
+        return {'success': true, 'message': 'Selamat datang kembali, ${_currentUser!.fullName}!'};
+      }
+
+      // If user is not found anywhere
       _isLoading = false;
       notifyListeners();
+      return {
+        'success': false,
+        'message': 'Akun "$cleanId" belum terdaftar di sistem. Silakan lakukan registrasi terlebih dahulu.',
+      };
+    } catch (e) {
+      debugPrint('Login validation note: $e');
+
+      // Check in-session registered users
+      if (_registeredUsers.containsKey(cleanId.toLowerCase())) {
+        _currentUser = _registeredUsers[cleanId.toLowerCase()]!;
+        _isAuthenticated = true;
+        _isLoading = false;
+        notifyListeners();
+        return {'success': true, 'message': 'Selamat datang kembali, ${_currentUser!.fullName}!'};
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return {
+        'success': false,
+        'message': 'Gagal masuk: Kredensial akun tidak cocok atau belum terdaftar. Silakan daftar akun baru.',
+      };
     }
   }
 
@@ -231,7 +290,7 @@ class AppStateService extends ChangeNotifier {
       debugPrint('Cloud signup notice: $e');
     }
 
-    _currentUser = UserModel(
+    final newUser = UserModel(
       id: 'usr_${nim.isNotEmpty ? nim : DateTime.now().millisecondsSinceEpoch}',
       nim: nim,
       fullName: fullName,
@@ -242,6 +301,14 @@ class AppStateService extends ChangeNotifier {
       phoneNumber: phoneNumber,
       role: UserRole.mahasiswa,
     );
+
+    // Save into registered registry
+    _registeredUsers[email.toLowerCase()] = newUser;
+    if (nim.isNotEmpty) {
+      _registeredUsers[nim.toLowerCase()] = newUser;
+    }
+
+    _currentUser = newUser;
     _isAuthenticated = true;
     _isLoading = false;
     notifyListeners();
